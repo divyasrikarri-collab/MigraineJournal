@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Migraine Journal</string>
+
+    <string name="channel_daily_checkin_name">Daily check-in</string>
+    <string name="channel_daily_checkin_description">One reminder a day to fill in your check-in.</string>
+
+    <string name="reminder_title">Daily check-in</string>
+    <string name="reminder_body">How was your sleep, water and stress today?</string>
+</resources>
