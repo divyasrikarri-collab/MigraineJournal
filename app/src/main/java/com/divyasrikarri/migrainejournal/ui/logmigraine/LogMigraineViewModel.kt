@@ -83,9 +83,12 @@ class LogMigraineViewModel(
     fun setPainLevel(level: Int) = _uiState.update { it.copy(painLevel = level.coerceIn(1, 10)) }
 
     fun setStart(millis: Long) = _uiState.update { state ->
-        // Keep the range valid if the user drags the start past an existing end.
-        val end = state.endDateTime?.takeIf { it >= millis }
-        state.copy(startDateTime = millis, endDateTime = end, ongoing = end == null && state.ongoing)
+        // Moving the start past the end pushes the end along with it, rather than clearing it:
+        // dropping the end would silently flip a finished migraine back to ongoing.
+        state.copy(
+            startDateTime = millis,
+            endDateTime = state.endDateTime?.coerceAtLeast(millis)
+        )
     }
 
     fun setEnd(millis: Long) = _uiState.update { state ->
@@ -95,7 +98,12 @@ class LogMigraineViewModel(
     fun setOngoing(ongoing: Boolean) = _uiState.update { state ->
         state.copy(
             ongoing = ongoing,
-            endDateTime = if (ongoing) null else state.endDateTime ?: System.currentTimeMillis()
+            endDateTime = if (ongoing) {
+                null
+            } else {
+                // Default to now, but never before the start — the start may be back-dated.
+                state.endDateTime ?: maxOf(System.currentTimeMillis(), state.startDateTime)
+            }
         )
     }
 

@@ -69,8 +69,8 @@ class MigraineRepository(
     fun observeFoodForDay(date: LocalDate): Flow<List<FoodEntry>> =
         foodEntryDao.observeByDate(DateUtils.toKey(date))
 
-    suspend fun getFoodForDay(date: LocalDate): List<FoodEntry> =
-        foodEntryDao.getByDate(DateUtils.toKey(date))
+    fun observeFoodBetween(from: LocalDate, toInclusive: LocalDate): Flow<List<FoodEntry>> =
+        foodEntryDao.observeInRange(DateUtils.toKey(from), DateUtils.toKey(toInclusive))
 
     fun observeKnownFoods(limit: Int = 60): Flow<List<String>> =
         foodEntryDao.observeKnownFoods(limit)

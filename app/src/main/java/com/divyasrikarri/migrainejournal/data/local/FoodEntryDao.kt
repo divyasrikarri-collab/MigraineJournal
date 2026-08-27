@@ -18,8 +18,11 @@ interface FoodEntryDao {
     @Query("SELECT * FROM food_entries WHERE date = :date ORDER BY mealTime ASC")
     fun observeByDate(date: String): Flow<List<FoodEntry>>
 
-    @Query("SELECT * FROM food_entries WHERE date = :date ORDER BY mealTime ASC")
-    suspend fun getByDate(date: String): List<FoodEntry>
+    @Query(
+        "SELECT * FROM food_entries WHERE date >= :from AND date <= :to " +
+            "ORDER BY date ASC, mealTime ASC"
+    )
+    fun observeInRange(from: String, to: String): Flow<List<FoodEntry>>
 
     @Query("SELECT * FROM food_entries ORDER BY date ASC, mealTime ASC")
     suspend fun getAllOnce(): List<FoodEntry>

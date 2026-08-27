@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.item
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
@@ -29,7 +30,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -228,10 +228,11 @@ fun DailyCheckInScreen(
                         label = { Text("Add a food or drink") },
                         singleLine = true,
                         trailingIcon = {
+                            // The trailing slot is icon-sized, so a text button would crowd it.
                             if (foodQuery.isNotBlank()) {
-                                TextButton(
-                                    onClick = { viewModel.addFood() }
-                                ) { Text("Add") }
+                                IconButton(onClick = { viewModel.addFood() }) {
+                                    Icon(Icons.Filled.Add, contentDescription = "Add food")
+                                }
                             }
                         },
                         supportingText = {

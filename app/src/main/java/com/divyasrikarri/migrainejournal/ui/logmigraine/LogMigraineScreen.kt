@@ -267,6 +267,23 @@ fun LogMigraineScreen(
         }
     }
 
+    state.error?.let { message ->
+        AlertDialog(
+            onDismissRequest = {
+                viewModel.consumeError()
+                onDone()
+            },
+            title = { Text("Can't open this entry") },
+            text = { Text(message) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.consumeError()
+                    onDone()
+                }) { Text("OK") }
+            }
+        )
+    }
+
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },

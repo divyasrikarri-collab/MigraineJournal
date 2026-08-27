@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -42,24 +41,20 @@ class InsightsViewModel(private val repository: MigraineRepository) : ViewModel(
                 val from = to.minusDays((range.days - 1).toLong())
                 combine(
                     repository.observeMigrainesBetween(from, to),
-                    repository.observeDailyLogsBetween(from, to)
-                ) { migraines, logs -> Triple(migraines, logs, grouping) }
-                    .map { (migraines, logs, activeGrouping) ->
-                        // Food is fetched per migraine day rather than observed wholesale:
-                        // the trigger callout only ever looks at days with an attack.
-                        val foods = migraines
-                            .map { DateUtils.localDateOf(it.startDateTime) }
-                            .distinct()
-                            .flatMap { repository.getFoodForDay(it) }
-                        InsightsCalculator.compute(
-                            migraines = migraines,
-                            dailyLogs = logs,
-                            foods = foods,
-                            from = from,
-                            toInclusive = to,
-                            grouping = activeGrouping
-                        )
-                    }
+                    repository.observeDailyLogsBetween(from, to),
+                    repository.observeFoodBetween(from, to)
+                ) { migraines, logs, foods ->
+                    // The calculator narrows food down to migraine days itself, so this is a
+                    // single range query rather than one lookup per day with an attack.
+                    InsightsCalculator.compute(
+                        migraines = migraines,
+                        dailyLogs = logs,
+                        foods = foods,
+                        from = from,
+                        toInclusive = to,
+                        grouping = grouping
+                    )
+                }
             }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), InsightsData())
 

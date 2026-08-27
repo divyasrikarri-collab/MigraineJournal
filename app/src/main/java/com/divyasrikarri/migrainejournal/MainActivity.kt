@@ -38,11 +38,19 @@ class MainActivity : ComponentActivity() {
         pendingRoute = routeFor(intent)
     }
 
-    private fun routeFor(intent: Intent?): String? =
-        when (intent?.getStringExtra(EXTRA_DESTINATION)) {
+    /**
+     * Reads the launching intent's destination and clears it. Without the clear, the extra
+     * survives on the same Intent across an activity recreation, so rotating the device would
+     * bounce the user back into the check-in.
+     */
+    private fun routeFor(intent: Intent?): String? {
+        val destination = intent?.getStringExtra(EXTRA_DESTINATION) ?: return null
+        intent.removeExtra(EXTRA_DESTINATION)
+        return when (destination) {
             DESTINATION_CHECK_IN -> Routes.checkIn()
             else -> null
         }
+    }
 
     companion object {
         const val EXTRA_DESTINATION = "com.divyasrikarri.migrainejournal.extra.DESTINATION"
