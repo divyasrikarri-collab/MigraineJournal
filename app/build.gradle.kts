@@ -28,8 +28,10 @@ android {
         applicationId = "com.divyasrikarri.migrainejournal"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        // Play rejects an upload whose versionCode does not exceed the previous one, so the
+        // publish workflow overrides this with the CI run number. Local builds get 1.
+        versionCode = (System.getenv("VERSION_CODE") ?: "1").toInt()
+        versionName = System.getenv("VERSION_NAME") ?: "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

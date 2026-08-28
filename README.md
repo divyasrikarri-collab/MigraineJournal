@@ -43,6 +43,42 @@ The same run publishes a `room-schemas` artifact. Download it and commit its con
 `app/schemas/` before the first Play release — see [Room schema](#room-schema) for why that
 matters.
 
+A second job, **Release build (R8)**, runs `assembleRelease` on every push. That is the only
+automated check on minification: `isMinifyEnabled` applies to the `release` build type only, so
+a green debug build says nothing about whether R8 and `proguard-rules.pro` are correct. The job
+builds unsigned — no keystore is present on the runner — and publishes the R8 `mapping.txt` as
+an artifact. It still cannot catch a *runtime* reflection failure; only installing a release
+build on a device does that.
+
+### Publishing to Play from CI
+
+`.github/workflows/publish.yml` builds a signed bundle and uploads it to the **internal** track.
+It is triggered by a version tag, not by a push to a branch:
+
+```bash
+git tag v1.0.1 && git push origin v1.0.1
+```
+
+It cannot perform the **first** upload. The Google Play Developer API cannot create a listing,
+and refuses uploads for a package until one bundle has been uploaded by hand in the Play
+Console. Release 1 is manual; this workflow covers release 2 onward.
+
+Required repository secrets:
+
+| Secret | Value |
+| --- | --- |
+| `PLAY_SERVICE_ACCOUNT_JSON` | Service account key JSON, granted release permission in Play Console |
+| `KEYSTORE_BASE64` | `base64 -w0 migrainejournal-upload.jks` |
+| `KEYSTORE_PASSWORD` | |
+| `KEY_ALIAS` | `upload` |
+| `KEY_PASSWORD` | |
+
+`versionCode` comes from the CI run number and `versionName` from the tag, because Play rejects
+any upload whose `versionCode` does not exceed the previous one. Locally both fall back to the
+values in `app/build.gradle.kts`; set `VERSION_CODE`/`VERSION_NAME` in the environment to
+override. The workflow uploads to `internal` and stops there — promotion to production is a
+deliberate step in the Console.
+
 ### Trying it in a browser
 
 To run the app without an Android device, feed that debug APK to a browser-based emulator such
