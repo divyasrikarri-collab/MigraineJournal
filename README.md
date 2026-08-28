@@ -75,6 +75,27 @@ log should never silently drop the user's history. That makes the exported schem
 every future `Migration`, so **commit `app/schemas/` before the first Play release**; without
 the v1 JSON on disk you cannot write or test the migration to v2.
 
+### Privacy policy and listing copy
+
+`docs/` holds the privacy policy page and the store listing text.
+
+Play requires the privacy policy at a public URL. To host it from this repo for free, merge
+`docs/` to the default branch, then in the repository's **Settings → Pages** set the source to
+that branch and the `/docs` folder. The policy is then served at:
+
+```
+https://<owner>.github.io/MigraineJournal/privacy-policy.html
+```
+
+Before publishing, replace `CONTACT_EMAIL_PLACEHOLDER` in `docs/privacy-policy.html` with the
+support address you want shown publicly — the page is world-readable, so use an address you
+are willing to publish. Play also asks for a contact email in the Console; that one is not
+shown on the listing.
+
+`docs/store-listing.md` has the app name, short and full descriptions, "what's new" text, the
+Data safety answers with the code that backs each one, and the list of graphics that still
+need to be produced.
+
 ### Play Console checklist
 
 - Data safety form. Nothing is transmitted off device, nothing is shared, and export is
