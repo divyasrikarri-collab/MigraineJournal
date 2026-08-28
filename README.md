@@ -33,6 +33,34 @@ The Gradle wrapper is checked in. The build needs the Android SDK (set `ANDROID_
 Android Studio create `local.properties`) and network access to `dl.google.com` and Maven
 Central for dependency resolution.
 
+### Cloud builds
+
+`.github/workflows/android.yml` runs the unit tests and builds a debug APK on every push, so a
+working Android SDK is not needed locally. Open the repository's **Actions** tab, pick the most
+recent run, and download the `migrainejournal-debug-apk` artifact.
+
+The same run publishes a `room-schemas` artifact. Download it and commit its contents to
+`app/schemas/` before the first Play release — see [Room schema](#room-schema) for why that
+matters.
+
+### Trying it in a browser
+
+To run the app without an Android device, feed that debug APK to a browser-based emulator such
+as [Appetize.io](https://appetize.io) (free tier, minute-limited):
+
+1. Download `migrainejournal-debug-apk` from the Actions run and unzip it.
+2. Upload `app-debug.apk` on Appetize's upload page.
+3. Pick a device running **API 33 or higher** and open the link it gives you.
+
+API 33+ matters: that is where `POST_NOTIFICATIONS` became a runtime permission, so it is the
+only way to exercise the request flow in `SettingsScreen.kt`. The link is shareable, which makes
+it a cheap way to show the app to closed-test recruits before they install anything.
+
+Two caveats. The debug APK is not the artifact you ship — `isMinifyEnabled` applies only to
+`release`, so a browser emulator running the debug build proves nothing about how R8 treats the
+release build. And a hosted emulator is a poor test of the daily reminder, which is a
+WorkManager job that fires on a real clock; test that on a real device.
+
 ## Releasing
 
 ### One-time: create an upload key
