@@ -33,6 +33,63 @@ The Gradle wrapper is checked in. The build needs the Android SDK (set `ANDROID_
 Android Studio create `local.properties`) and network access to `dl.google.com` and Maven
 Central for dependency resolution.
 
+## Releasing
+
+### One-time: create an upload key
+
+```bash
+keytool -genkeypair -v -keystore ~/keys/migrainejournal-upload.jks \
+  -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+```
+
+Copy `keystore.properties.example` to `keystore.properties` and fill it in. Both the keystore
+and that file are gitignored. Back them up somewhere durable — without the upload key you
+cannot ship an update to an existing listing except through Google's key reset process.
+
+When `keystore.properties` is absent the release build still assembles, unsigned, so machines
+that only run `test` and `lint` need no signing material.
+
+### Each release
+
+1. Bump `versionCode` (must increase on every upload) and `versionName` in `app/build.gradle.kts`.
+2. `./gradlew test lint`
+3. `./gradlew bundleRelease` → `app/build/outputs/bundle/release/app-release.aab`, the artifact
+   Play accepts.
+4. Install the minified build on a real device and exercise it before uploading:
+
+   ```bash
+   ./gradlew assembleRelease   # app/build/outputs/apk/release/
+   ```
+
+   `isMinifyEnabled` is on, so R8 runs. `proguard-rules.pro` keeps the Room entities and
+   `ReminderWorker`, the two things reflected over by name — but a release build can still
+   fail at runtime where a debug build passes. Check the daily reminder fires and that CSV
+   and PDF export both open in the share sheet.
+5. Commit `app/schemas/` if the build regenerated it (see below).
+
+### Room schema
+
+`exportSchema = true` writes the schema JSON to `app/schemas/` on each build, and
+`MigraineDatabase` deliberately does *not* call `fallbackToDestructiveMigration()` — a health
+log should never silently drop the user's history. That makes the exported schema the input to
+every future `Migration`, so **commit `app/schemas/` before the first Play release**; without
+the v1 JSON on disk you cannot write or test the migration to v2.
+
+### Play Console checklist
+
+- Data safety form. Nothing is transmitted off device, nothing is shared, and export is
+  user-initiated through the system share sheet; `data_extraction_rules.xml` backs the
+  "not backed up to cloud" answer.
+- Privacy policy at a public URL — required for a health app, and it must be a hosted URL.
+- Health apps declaration: this app claims no medical device functionality. Keep the in-app
+  disclaimer visible.
+- Content rating questionnaire, 512×512 icon, 1024×500 feature graphic, ≥2 phone screenshots.
+- Personal developer accounts must run a closed test with a minimum number of opted-in
+  testers for 14 continuous days before applying for production access. Check the current
+  threshold in the Console and start it early; it is the longest item on the schedule.
+- `targetSdk` must meet Play's current floor for new uploads, which rises each August. This
+  app targets 35 (Android 15) — verify that is still accepted before planning a release date.
+
 ## Layout
 
 ```

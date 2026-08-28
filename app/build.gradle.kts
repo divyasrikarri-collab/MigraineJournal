@@ -1,9 +1,24 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
 }
+
+// Upload-key credentials, kept out of version control. See keystore.properties.example.
+// Absent on machines that only run `test`/`lint`, in which case the release build stays
+// unsigned rather than failing.
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.inputStream().use { load(it) }
+    }
+}
+
+fun keystoreProperty(name: String): String = keystoreProperties.getProperty(name)
+    ?: error("keystore.properties is missing '$name' — see keystore.properties.example")
 
 android {
     namespace = "com.divyasrikarri.migrainejournal"
@@ -19,8 +34,22 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        if (keystorePropertiesFile.exists()) {
+            create("release") {
+                storeFile = file(keystoreProperty("storeFile"))
+                storePassword = keystoreProperty("storePassword")
+                keyAlias = keystoreProperty("keyAlias")
+                keyPassword = keystoreProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            // Null when keystore.properties is absent; the bundle is then unsigned and
+            // Play will reject it, which is the loud failure we want over a silent one.
+            signingConfig = signingConfigs.findByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

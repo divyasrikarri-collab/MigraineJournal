@@ -9,3 +9,8 @@
 .cxx
 local.properties
 app/build/
+
+# Signing material. Never commit the upload key or its passwords.
+keystore.properties
+*.jks
+*.keystore
