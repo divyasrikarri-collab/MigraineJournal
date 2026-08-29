@@ -151,10 +151,15 @@ that branch and the `/docs` folder. The policy is then served at:
 https://<owner>.github.io/MigraineJournal/privacy-policy.html
 ```
 
-Before publishing, replace `CONTACT_EMAIL_PLACEHOLDER` in `docs/privacy-policy.html` with the
-support address you want shown publicly — the page is world-readable, so use an address you
-are willing to publish. Play also asks for a contact email in the Console; that one is not
-shown on the listing.
+The policy deliberately carries no email address. It points questions at this repository's
+issue tracker instead, so no personal inbox ends up on a world-readable page that spam
+harvesters scrape. That requires the repository to stay public and Issues enabled — if either
+changes, replace the contact line with a channel that works.
+
+Note that this does not spare you a contact email entirely: the Play Console requires one, and
+for an individual developer account Play shows it publicly in the listing's developer contact
+section. That is Play's own field, separate from this page, and worth pointing at an address
+you are content to publish.
 
 `docs/store-listing.md` has the app name, short and full descriptions, "what's new" text, the
 Data safety answers with the code that backs each one, and the list of graphics that still
